@@ -1,0 +1,45 @@
+#include <stdio.h>
+
+__global__ void square(int * dout ,int * din )
+{
+   int seq=threadIdx.x;
+   int f=din[seq];
+   dout[seq] = f*f;
+
+}
+
+int main()
+{
+	const int arraysize=10;
+	const int arraybytes = arraysize * sizeof(int);
+	int hin[arraysize];
+	for(int i=0;i<arraysize;i++)
+	{
+		hin[i]=i;
+	}
+	int hout[arraysize];
+	int * din;
+	int * dout;
+
+	cudaMalloc(&din, arraybytes);
+	cudaMalloc(&dout, arraybytes);
+
+	cudaMemcpy(din,hin,arraybytes,cudaMemcpyHostToDevice);
+
+	square<<<1,arraysize>>>(dout,din);
+
+	cudaMemcpy(hout,dout,arraybytes,cudaMemcpyDeviceToHost);
+
+	for (int i=0;i<arraysize;i++)
+	{
+		printf("%d", hout[i]);
+		printf("\n");
+	}
+
+	cudaFree(din);
+	cudaFree(dout);
+
+return 0;
+
+}
+
