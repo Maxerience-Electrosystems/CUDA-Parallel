@@ -108,6 +108,10 @@ void recombineChannels(const unsigned char* const redChannel,
   unsigned char blue  = blueChannel[thread_1D_pos];
 
   //Alpha should be 255 for no transparency
+  //put blue for red channel and vice-versa while generating
+  //the output pixel to compensate for the BGR representation of
+  //Mat outputImageRGBA later.
+
   uchar4 outputPixel = make_uchar4(blue, green, red, 255);
 
   outputImageRGBA[thread_1D_pos] = outputPixel;
