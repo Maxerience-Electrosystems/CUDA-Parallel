@@ -154,8 +154,8 @@ int main()
 
 // Step 4: Pixel to pixel comparison on CUDA kernel
 
-	       const dim3 blockSize(1,1,1);
-	       const dim3 gridSize(numRows,numCols,1);
+	       const dim3 blockSize(32,32,1);
+	       const dim3 gridSize(ceil(numRows/32),ceil(numCols/32),1);
 	       pixel_comparison<<<gridSize,blockSize>>>(d_referenceImage,d_testImage,d_difference,numRows,numCols);
 
 	       //cudaDeviceSynchronize();
