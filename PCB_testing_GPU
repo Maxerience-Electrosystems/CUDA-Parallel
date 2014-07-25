@@ -35,10 +35,9 @@ __global__ void pixel_comparison(const uchar4* const d_referenceImage,const ucha
 	     {
 	       return;
 	     }
+
 	int pixel_pos = rgba_x+rgba_y*numCols;
 
-
-	//printf("%d\n",pixel_pos);
 	uchar4 rgba_reference = d_referenceImage[pixel_pos];
 	uchar4 rgba_test = d_testImage[pixel_pos];
 	unsigned char red = (unsigned char)(rgba_reference.x-rgba_test.x);
@@ -155,16 +154,14 @@ int main()
 
 // Step 4: Pixel to pixel comparison on CUDA kernel
 
-	       const dim3 blockSize(32,32,1);
-	       const dim3 gridSize(ceil(numRows/32),ceil(numCols/32),1);
+	       const dim3 blockSize(1,1,1);
+	       const dim3 gridSize(numRows,numCols,1);
 	       pixel_comparison<<<gridSize,blockSize>>>(d_referenceImage,d_testImage,d_difference,numRows,numCols);
 
 	       //cudaDeviceSynchronize();
 
 	       cudaMemcpy(difference_image.ptr<unsigned char>(0),d_difference,sizeof(uchar4)*numPixels,cudaMemcpyDeviceToHost);
 
-// Step 5: Printing timing information and displaying the differences in the form of an image
-	       
 	       tm.stop();
 	       double detectionTime = tm.getTimeMilli();
 	       cout<<"Time consumed: "<<detectionTime<<" msecs"<<endl;
