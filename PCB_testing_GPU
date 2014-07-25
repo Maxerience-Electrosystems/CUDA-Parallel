@@ -158,7 +158,7 @@ int main()
 	       const dim3 gridSize(ceil(numRows/32),ceil(numCols/32),1);
 	       pixel_comparison<<<gridSize,blockSize>>>(d_referenceImage,d_testImage,d_difference,numRows,numCols);
 
-	       //cudaDeviceSynchronize();
+	       cudaDeviceSynchronize();
 
 	       cudaMemcpy(difference_image.ptr<unsigned char>(0),d_difference,sizeof(uchar4)*numPixels,cudaMemcpyDeviceToHost);
 
