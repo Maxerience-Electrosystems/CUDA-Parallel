@@ -28,23 +28,29 @@ using namespace cv;
 __global__ void pixel_comparison(const uchar4* const d_referenceImage,const uchar4* const d_testImage,uchar4* const d_difference,int numRows,int numCols)
 {
 
-	int rgba_x = blockIdx.x * blockDim.x + threadIdx.x;
-	int rgba_y = blockIdx.y * blockDim.y + threadIdx.y;
+int rgba_x = blockIdx.x * blockDim.x + threadIdx.x;
+int rgba_y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if ( rgba_x >= numCols || rgba_y >= numRows )
-	     {
-	       return;
-	     }
+if ( rgba_x >= numCols || rgba_y >= numRows )
+{
+return;
+}
 
-	int pixel_pos = rgba_x+rgba_y*numCols;
+int pixel_pos = rgba_x+rgba_y*numCols;
 
-	uchar4 rgba_reference = d_referenceImage[pixel_pos];
-	uchar4 rgba_test = d_testImage[pixel_pos];
-	unsigned char red = (unsigned char)(rgba_reference.x-rgba_test.x);
-	unsigned char green = (unsigned char)(rgba_reference.y-rgba_test.y);
-	unsigned char blue = (unsigned char)(rgba_reference.z-rgba_test.z);
-    uchar4 outputPixel = make_uchar4(blue,green,red,255);
-	d_difference[pixel_pos] = outputPixel;
+uchar4 rgba_reference = d_referenceImage[pixel_pos];
+uchar4 rgba_test = d_testImage[pixel_pos];
+unsigned char red = (unsigned char)(rgba_reference.x-rgba_test.x);
+unsigned char green = (unsigned char)(rgba_reference.y-rgba_test.y);
+unsigned char blue = (unsigned char)(rgba_reference.z-rgba_test.z);
+if((int)red!=0 || (int)green!=0 || (int)blue!=0)
+  {
+    red=(unsigned char)255;
+    green=(unsigned char)255;
+    blue=(unsigned char)255;
+  }
+uchar4 outputPixel = make_uchar4(blue,green,red,255);
+d_difference[pixel_pos] = outputPixel;
 
 }
 
@@ -52,64 +58,64 @@ int main()
 {
 // Step 1: Input reference and test image into the workspace
 
-	    Mat image_reference = imread("reference_image");
-	    if (image_reference.empty())
-	    {
-	       cout << "Cannot load image!" << endl;
-	       return -1;
-	     }
-	       namedWindow( "Reference Image", CV_WINDOW_AUTOSIZE );
-	       imshow( "Reference Image", image_reference );
-	      // waitKey(0);
+Mat image_reference = imread("reference_image");
+if (image_reference.empty())
+{
+cout << "Cannot load image!" << endl;
+return -1;
+}
+namedWindow( "Reference Image", CV_WINDOW_AUTOSIZE );
+imshow( "Reference Image", image_reference );
+// waitKey(0);
 
-	      //getting and printing pixel information
+//getting and printing pixel information
 
-	       int numRows_reference=image_reference.rows;
-	       int numCols_reference=image_reference.cols;
-	       int numPixels_reference=numRows_reference*numCols_reference;
+int numRows_reference=image_reference.rows;
+int numCols_reference=image_reference.cols;
+int numPixels_reference=numRows_reference*numCols_reference;
 
-	       /* cout<< numRows <<endl;
-	          cout<< numCols <<endl;
-	          cout<< numPixels <<endl;
-	       */
+/* cout<< numRows <<endl;
+cout<< numCols <<endl;
+cout<< numPixels <<endl;
+*/
 
-	      //converting BGR, which is an inbuilt format of openCV to RGBA
+//converting BGR, which is an inbuilt format of openCV to RGBA
 
-	      cv::cvtColor(image_reference, image_reference, CV_BGR2RGBA);
+cv::cvtColor(image_reference, image_reference, CV_BGR2RGBA);
 
 
-	  //     namedWindow( "RGBA", CV_WINDOW_AUTOSIZE );
-	  //     imshow( "RGBA", image_reference );
-	  //     waitKey(0);
+// namedWindow( "RGBA", CV_WINDOW_AUTOSIZE );
+// imshow( "RGBA", image_reference );
+// waitKey(0);
 
-	       Mat image_test = imread("test_image");
-	           if (image_test.empty())
-	           {
-	              cout << "Cannot load image!" << endl;
-	              return -1;
-	           }
-	              namedWindow( "Test Image", CV_WINDOW_AUTOSIZE );
-	              imshow( "Test Image", image_test );
-	              //waitKey(0);
+Mat image_test = imread("test_image");
+if (image_test.empty())
+{
+cout << "Cannot load image!" << endl;
+return -1;
+}
+namedWindow( "Test Image", CV_WINDOW_AUTOSIZE );
+imshow( "Test Image", image_test );
+//waitKey(0);
 
-	             //getting and printing pixel information
+//getting and printing pixel information
 
-	              int numRows_test=image_test.rows;
-	              int numCols_test=image_test.cols;
-	              int numPixels_test=numRows_test*numCols_test;
+int numRows_test=image_test.rows;
+int numCols_test=image_test.cols;
+int numPixels_test=numRows_test*numCols_test;
 
-	              /* cout<< numRows <<endl;
-	                 cout<< numCols <<endl;
-	                 cout<< numPixels <<endl;
-	              */
+/* cout<< numRows <<endl;
+cout<< numCols <<endl;
+cout<< numPixels <<endl;
+*/
 
-	             //converting BGR, which is an inbuilt format of openCV to RGBA
+//converting BGR, which is an inbuilt format of openCV to RGBA
 
-	             cv::cvtColor(image_test, image_test, CV_BGR2RGBA);
+cv::cvtColor(image_test, image_test, CV_BGR2RGBA);
 
-	    //        namedWindow( "RGBA", CV_WINDOW_AUTOSIZE );
-	    //          imshow( "RGBA", image_test );
-	    //          waitKey(0);
+// namedWindow( "RGBA", CV_WINDOW_AUTOSIZE );
+// imshow( "RGBA", image_test );
+// waitKey(0);
 
 
 // Step 2: Image registration
@@ -121,13 +127,13 @@ int main()
           if(numRows_reference==numRows_test && numCols_reference==numCols_test)
 
           {
-	        	  numRows=numRows_reference;
-	        	  numCols=numCols_reference;
-	        	  numPixels=numRows*numCols;
-	      }
+numRows=numRows_reference;
+numCols=numCols_reference;
+numPixels=numRows*numCols;
+}
 
           else
-        	  return -1;
+         return -1;
 
 // Step 3: Format conversion and memory allocation
 
@@ -138,38 +144,76 @@ int main()
 
           difference_image.create(numRows,numCols,CV_8UC4);
 
-	       uchar4 *h_referenceImage = (uchar4 *)image_reference.ptr<unsigned char>(0);
-	       uchar4 *d_referenceImage;
-	       uchar4 *h_testImage = (uchar4 *)image_test.ptr<unsigned char>(0);
-	       uchar4 *d_testImage;
-	       uchar4 *d_difference;
-	       uchar4* h_difference = (uchar4 *)difference_image.ptr<unsigned char>(0);
+uchar4 *h_referenceImage = (uchar4 *)image_reference.ptr<unsigned char>(0);
+uchar4 *d_referenceImage;
+uchar4 *h_testImage = (uchar4 *)image_test.ptr<unsigned char>(0);
+uchar4 *d_testImage;
+uchar4 *d_difference;
+uchar4* h_difference = (uchar4 *)difference_image.ptr<unsigned char>(0);
 
-	       cudaMalloc(&d_referenceImage,sizeof(uchar4)*numPixels);
-	       cudaMalloc(&d_testImage,sizeof(uchar4)*numPixels);
-	       cudaMalloc(&d_difference,sizeof(uchar4)*numPixels);
+cudaMalloc(&d_referenceImage,sizeof(uchar4)*numPixels);
+cudaMalloc(&d_testImage,sizeof(uchar4)*numPixels);
+cudaMalloc(&d_difference,sizeof(uchar4)*numPixels);
 
-	       cudaMemcpy(d_referenceImage,h_referenceImage,sizeof(uchar4)*numPixels,cudaMemcpyHostToDevice);
-	       cudaMemcpy(d_testImage,h_testImage,sizeof(uchar4)*numPixels,cudaMemcpyHostToDevice);
+cudaMemcpy(d_referenceImage,h_referenceImage,sizeof(uchar4)*numPixels,cudaMemcpyHostToDevice);
+cudaMemcpy(d_testImage,h_testImage,sizeof(uchar4)*numPixels,cudaMemcpyHostToDevice);
 
 // Step 4: Pixel to pixel comparison on CUDA kernel
 
-	       const dim3 blockSize(32,32,1);
-	       const dim3 gridSize(40,30,1);
-	       pixel_comparison<<<gridSize,blockSize>>>(d_referenceImage,d_testImage,d_difference,numRows,numCols);
+const dim3 blockSize(32,32,1);
+const dim3 gridSize(40,30,1);
+pixel_comparison<<<gridSize,blockSize>>>(d_referenceImage,d_testImage,d_difference,numRows,numCols);
 
-	       cudaDeviceSynchronize();
+cudaDeviceSynchronize();
 
-	       cudaMemcpy(difference_image.ptr<unsigned char>(0),d_difference,sizeof(uchar4)*numPixels,cudaMemcpyDeviceToHost);
+cudaMemcpy(difference_image.ptr<unsigned char>(0),d_difference,sizeof(uchar4)*numPixels,cudaMemcpyDeviceToHost);
 
-	       tm.stop();
-	       double detectionTime = tm.getTimeMilli();
-	       cout<<"Time consumed: "<<detectionTime<<" msecs"<<endl;
+namedWindow("Difference Image", CV_WINDOW_AUTOSIZE);
+imshow("Difference Image",difference_image);
 
-	       namedWindow("Difference Image", CV_WINDOW_AUTOSIZE);
-	       imshow("Difference Image",difference_image);
-	       waitKey(0);
+// Step 5: Extracting the defective components from the reference image by using the information in the difference image
 
-	return 0;
+   Mat src_gray;
+	             int thresh = 254;
+	             RNG rng(12345);
+
+	             cvtColor( difference_image, src_gray, CV_RGBA2GRAY );
+	             blur( src_gray, src_gray, Size(3,3) );
+
+	             Mat threshold_output;
+	               vector<vector<Point> > contours;
+	               vector<Vec4i> hierarchy;
+	               adaptiveThreshold(src_gray, threshold_output, 255, ADAPTIVE_THRESH_GAUSSIAN_C,  THRESH_BINARY, 151, 20);
+	               // Detect edges using Threshold
+	            //   threshold( src_gray, threshold_output, thresh, 255, THRESH_BINARY );
+	               /// Find contours
+	               findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+	               /// Approximate contours to polygons + get bounding rects and circles
+	               vector<vector<Point> > contours_poly( contours.size() );
+	               vector<Rect> boundRect( contours.size() );
+	               std::cout<<contours.size()<<endl;
+	             Mat components[50];
+	             char b[10];
+	               for( int i = 0; i < contours.size(); i++ )
+	                  { approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
+	                    boundRect[i] = boundingRect( Mat(contours_poly[i]) );
+	                    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+	                    //rectangle( src, boundRect[i].tl(), boundRect[i].br(), color, 1 , 8, 0 );
+	                    components[i]=image_reference(boundRect[i]).clone();
+                            cv::cvtColor(components[i],components[i],CV_BGR2RGBA);
+	                    sprintf(b,"component %d",i+1);
+	                    imshow(b,components[i]);
+	                  }
+
+// Step 6: Calculate and print the time consumed in the entire process
+
+tm.stop();
+double detectionTime = tm.getTimeMilli();
+cout<<"Time consumed: "<<detectionTime<<" msecs"<<endl;
+
+waitKey(0);
+
+return 0;
 
 }
