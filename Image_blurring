@@ -29,7 +29,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
     if ( column >= numCols || row >= numRows )
      {
        return;
-     }
+     } 
 
 
 	float result = 0.f;
