@@ -147,7 +147,7 @@ int main()
                         imwrite(b,croppedFaceImage);
 
                       	Ptr<FaceRecognizer> tester = createEigenFaceRecognizer();
-                       	const char* file1="model_xml.xml";
+                       	const char* file1="model_xml.xml"; 
                        	tester->load(file1);
 
                         Mat testSample = imread(b,0);
