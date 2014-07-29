@@ -78,14 +78,12 @@ int numPixels_reference=numRows_reference*numCols_reference;
 
 cv::cvtColor(image_reference, image_reference, CV_BGR2RGBA);
 
-Mat image_test = imread("test_image");
+Mat image_test = imread("DUT_2");
 if (image_test.empty())
 {
 cout << "Cannot load image!" << endl;
 return -1;
 }
-namedWindow( "Test Image", CV_WINDOW_AUTOSIZE );
-imshow( "Test Image", image_test );
 
 //obtaining pixel information for test image
 
@@ -155,7 +153,7 @@ imshow("Difference Image",difference_image);
                  Mat src_gray;
 	             RNG rng(12345);
 
-	             cvtColor(difference_image,src_gray,CV_RGBA2GRAY );
+	             cvtColor(difference_image,src_gray,CV_RGBA2GRAY);
 	             blur(src_gray,src_gray,Size(3,3));
 
 	             Mat threshold_output;
@@ -168,8 +166,8 @@ imshow("Difference Image",difference_image);
 
 	          // Approximate contours to polygons + get bounding rects and circles
 
-	             vector<vector<Point> > contours_poly( contours.size() );
-	             vector<Rect> boundRect( contours.size() );
+	             vector<vector<Point> > contours_poly(contours.size());
+	             vector<Rect> boundRect(contours.size());
 	             cout<<"Number of defects: "<<contours.size()<<endl;
 
 	          // Obtaining the images of the region of defects from the reference image
@@ -179,12 +177,19 @@ imshow("Difference Image",difference_image);
 	               for( int i = 0; i < contours.size(); i++ )
 	                  { approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
 	                    boundRect[i] = boundingRect( Mat(contours_poly[i]) );
-	                    Scalar color = Scalar(rng.uniform(0,255),rng.uniform(0,255),rng.uniform(0,255));
+	                    Scalar color = Scalar(255,0,0);
+	                    rectangle(image_test,boundRect[i].tl(),boundRect[i].br(),color,3,8,0);
 	                    components[i]=image_reference(boundRect[i]).clone();
                         cv::cvtColor(components[i],components[i],CV_BGR2RGBA);
 	                    sprintf(b,"component %d",i+1);
 	                    imshow(b,components[i]);
 	                  }
+
+	           // Displaying the test image with the markings for the defects
+
+	               cv::cvtColor(image_test,image_test,CV_BGR2RGBA);
+	               namedWindow("Test Image",CV_WINDOW_AUTOSIZE);
+	               imshow("Test Image",image_test);
 
 // Step 6: Calculate and print the time consumed in the entire process
 
