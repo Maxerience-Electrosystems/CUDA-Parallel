@@ -150,46 +150,47 @@ imshow("Difference Image",difference_image);
 
 // Step 5: Extracting the defective components from the reference image by using the information in the difference image
 
-                 Mat src_gray;
-	             RNG rng(12345);
+ Mat src_gray;
 
-	             cvtColor(difference_image,src_gray,CV_RGBA2GRAY);
-	             blur(src_gray,src_gray,Size(3,3));
+cvtColor(difference_image,src_gray,CV_RGBA2GRAY);
+blur(src_gray,src_gray,Size(3,3));
 
-	             Mat threshold_output;
-	             vector<vector<Point> > contours;
-	             vector<Vec4i> hierarchy;
-	             threshold_output=src_gray;
+Mat threshold_output;
+vector<vector<Point> > contours;
+vector<Vec4i> hierarchy;
+threshold_output=src_gray;
 
-	          // Find contours
-	             findContours(src_gray,contours,hierarchy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
+// Find contours
+findContours(src_gray,contours,hierarchy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
 
-	          // Approximate contours to polygons + get bounding rects and circles
+// Approximate contours to polygons + get bounding rects and circles
 
-	             vector<vector<Point> > contours_poly(contours.size());
-	             vector<Rect> boundRect(contours.size());
-	             cout<<"Number of defects: "<<contours.size()<<endl;
+vector<vector<Point> > contours_poly(contours.size());
+vector<Rect> boundRect(contours.size());
+cout<<"Number of defects: "<<contours.size()<<endl;
 
-	          // Obtaining the images of the region of defects from the reference image
+// Obtaining the images of the region of defects from the reference image
 
-	             Mat components[50];
-	             char b[100];
-	               for( int i = 0; i < contours.size(); i++ )
-	                  { approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
-	                    boundRect[i] = boundingRect( Mat(contours_poly[i]) );
-	                    Scalar color = Scalar(255,0,0);
-	                    rectangle(image_test,boundRect[i].tl(),boundRect[i].br(),color,3,8,0);
-	                    components[i]=image_reference(boundRect[i]).clone();
-                        cv::cvtColor(components[i],components[i],CV_BGR2RGBA);
-	                    sprintf(b,"component %d",i+1);
-	                    imshow(b,components[i]);
-	                  }
+Mat components[50];
+char b[100];
 
-	           // Displaying the test image with the markings for the defects
+for(int i=0;i<contours.size();i++)
+{
+approxPolyDP(Mat(contours[i]),contours_poly[i],3,true);
+boundRect[i] = boundingRect( Mat(contours_poly[i]) );
+Scalar color = Scalar(255,0,0);
+rectangle(image_test,boundRect[i].tl(),boundRect[i].br(),color,3,8,0);
+components[i]=image_reference(boundRect[i]).clone();
+cv::cvtColor(components[i],components[i],CV_BGR2RGBA);
+sprintf(b,"component %d",i+1);
+imshow(b,components[i]);
+}
 
-	               cv::cvtColor(image_test,image_test,CV_BGR2RGBA);
-	               namedWindow("Test Image",CV_WINDOW_AUTOSIZE);
-	               imshow("Test Image",image_test);
+// Displaying the test image with the markings for the defects
+
+cv::cvtColor(image_test,image_test,CV_BGR2RGBA);
+namedWindow("Test Image",CV_WINDOW_AUTOSIZE);
+imshow("Test Image",image_test);
 
 // Step 6: Calculate and print the time consumed in the entire process
 
